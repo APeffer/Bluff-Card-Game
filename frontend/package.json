@@ -6,11 +6,8 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-<<<<<<< HEAD
     "firebase": "^10.14.1",
     "prettier": "^3.3.3",
-=======
->>>>>>> 5f6897875c18080e0b86377b80f58481afcb4572
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-scripts": "5.0.1",
