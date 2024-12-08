@@ -9,6 +9,10 @@ function MainMenu({ changeScene, user }) {
     changeScene('game');
   }
 
+  const handleChangeToWS = () => {
+    changeScene('websockettest');
+  }
+
   const handleChangeToSignUp = () => {
     changeScene('signup');
   }
@@ -36,6 +40,7 @@ function MainMenu({ changeScene, user }) {
             <div>
               <h4>Welcome {user.email} </h4>
               <button id="btn_newGame" onClick={handleNewGame}>New Game</button>
+              <button id="btn_Websocket" onClick={handleChangeToWS}>Websocket</button>  {/* TEST BUTTON TO TEST WEB SOCKET */}
               <button id="btn_logout" onClick={handleLogout}>Log Out</button>
             </div>
           ) : (

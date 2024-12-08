@@ -1,8 +1,10 @@
 import React from 'react';
 import "./Gameboard.css";
 import Hand from '../hand/Hand';
+import { auth } from "../../firebase.js";
 
 function Gameboard({ children }) {
+  
 
   // sample player object
   const player1 = {

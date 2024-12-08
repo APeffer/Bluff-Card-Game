@@ -10,7 +10,8 @@ import "./Card.css";
 
 function Card({rank, suit}) {
     // cards are initially face down
-    const [upright, setUpright] = useState(false);
+    const [upright, setUpright] = useState(true);
+    const [selected, setSelected] = useState(false)
 
 
     // assign each suit to it's equivalent image (ex. 3 of diamonds = 4.4.png)
@@ -37,11 +38,15 @@ function Card({rank, suit}) {
     setUpright(!upright);
   };
 
+  const handleSelect = () => {
+    selected ? setSelected(false) : setSelected(true);
+  }
+
   return (
-    <div className={"card"} onClick={flipCard}>
+    <div className={"card"} onClick={handleSelect}>
         { // card is upright? show card, else show cardback
           upright ? 
-          <img src={`/sprites/cards/${rank}.${suit}.png`} alt={`Card rank:${rank} suit:${suit}`}></img>
+          <img src={`/sprites/cards/${rank}.${suit}.png`} style={selected ? {border:'solid', borderColor:'#F4F'} : {border:'none', borderColor:'none'} } alt={`Card rank:${rank} suit:${suit}`}></img>
           : <img src={`/sprites/cards/Back2.png`} alt={`Card facedown`}></img>
         }
 
