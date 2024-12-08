@@ -50,7 +50,7 @@ def player_action():
     try:
         player_cards, rank = game_instance.play_turn(player_index)
     except Exception as e:
-        return jsonify({"error": str(e)}), 400
+        return jsonify({"error": str(e)}), 500
 
     # Handle bluff calling
     if request.json.get('challenge', False):
@@ -58,6 +58,24 @@ def player_action():
             challenger_index = (player_index + 1) % len(game_instance.players)
             game_instance.call_bluff(player_index, challenger_index, announced_rank, selected_cards)
         except Exception as e:
-            return jsonify({"error": str(e)}), 400
+            return jsonify({"error": str(e)}), 500
 
     return jsonify({"message": "Action processed", "next_turn": (player_index + 1) % len(game_instance.players)})
+
+@app.route('/game_state', methods=['GET'])
+def game_state():
+    global game_instance
+    if game_instance is None:
+        return jsonify({"error": "Game not started"}), 400
+
+    state = {
+        "players":[
+        {
+            'index': i,
+            'num_cards': len(player.cards)
+        } for i, player in enumerate(game_instance.players)
+        ],
+        "center_pile":game_instance.get_card_names(game_instance.center_pile.cards),
+    }
+
+    return jsonify(state)
