@@ -79,3 +79,20 @@ def game_state():
     }
 
     return jsonify(state)
+
+@app.route('/check-winner', methods=['GET'])
+def check_winner():
+    global game_instance
+    if game_instance is None:
+        return jsonify({"error": "Game not started"}), 400
+    try:
+        winner_index = game_instance.check_winner()
+        if winner_index != -1:
+            return jsonify({"winner": winner_index})
+        else:
+            return jsonify({"winner": None, "message": "No winner yet"})
+    except Exception as e:
+        return jsonify({"error": "unable to determine the winner", "details": str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(debug=True)
