@@ -1,3 +1,4 @@
+from collections import deque
 from flask import Flask, request, jsonify
 from bluff import BluffGame
 import pydealer
@@ -32,36 +33,42 @@ def start_game():
 @app.route('/player-action', methods=['POST'])
 def player_action():
     global game_instance
-    player_index = request.json['player_index']
-    announced_rank = request.json['announced_rank']
-    selected_cards = request.json['selected_cards']
-
-    # Validate input
-    if not isinstance(player_index, int) or not isinstance(announced_rank, str):
-        return jsonify({"error": "Invalid input"}), 400
-
-    # convert indices to card objects
-    try:
-        player_hand = game_instance.players[player_index]
-        selected_cards = [player_hand.cards[i] for i in selected_cards]     
-    except (IndexError, AttributeError):
-        return jsonify({"error": "Invalid card index"}), 400
     
-    # Play turn
     try:
-        player_cards, rank = game_instance.play_turn(player_index)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        data = request.json
+        player_index = data['player_index']
+        announced_rank = data['announced_rank']
+        selected_cards = data['selected_cards']
 
-    # Handle bluff calling
-    if request.json.get('challenge', False):
+        # Validate input
+        if not isinstance(player_index, int) or not isinstance(announced_rank, str) or not isinstance(selected_cards, list):
+            return jsonify({"error": "Invalid input"}), 400
+
+        # convert indices to card objects
         try:
-            challenger_index = (player_index + 1) % len(game_instance.players)
-            game_instance.call_bluff(player_index, challenger_index, announced_rank, selected_cards)
-        except Exception as e:
-            return jsonify({"error": str(e)}), 500
+            player_hand = game_instance.players[player_index]
+            selected_cards = [player_hand.cards[i] for i in selected_cards]     
+        except (IndexError, AttributeError):
+            return jsonify({"error": "Invalid card index"}), 400
 
-    return jsonify({"message": "Action processed", "next_turn": (player_index + 1) % len(game_instance.players)})
+        #remove selected cards from player's hand
+        for i in sorted(selected_cards, reverse=True):
+            del player_hand.cards[i]
+
+        # update the center pile
+        temp_stack = pydealer.Stack()
+        temp_stack.card = deque(selected_cards)
+        game_instance.center_pile.add(temp_stack)
+
+        #update the game state
+        game_instance.last_played_cards = selected_cards
+        game_instance.announced_rank = announced_rank
+
+        return jsonify({"message": "Player action successful"}),200
+    
+    except Exception as e:
+        return jsonify({"error": "An error occurred while processing the action"}), 500
+
 
 @app.route('/game_state', methods=['GET'])
 def game_state():
