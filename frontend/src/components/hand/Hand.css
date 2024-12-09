@@ -4,6 +4,10 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: end;
+    justify-items: end;
+    
+    
 }
 
 .playerName {
@@ -16,8 +20,45 @@
     display: flex;
     flex-direction: row;
     text-align: center;
+    justify-content: center;
+    width: 70%;
+    flex-wrap: wrap-reverse;
 }
 
 .hand {
     display: flex;
 }
+
+.card-container {
+    display: inline-block;
+    margin: 10px -20px;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+  }
+  
+  .card-container:hover {
+    transform: scale(1.05);
+  }
+  
+  .card-container.selected {
+    border: 2px solid #007bff; /* Blue border for selected cards */
+    border-radius: 5px;        /* Optional: Rounded corners */
+    background-color: rgba(0, 123, 255, 0.1); /* Light blue background */
+    transform: scale(1);   
+    translate: 0% -20%;  /* Slightly enlarge the selected card */
+  }
+
+  /* Rotate hands for other players */
+.upsideDown {
+    transform: rotate(180deg); /* Rotates the hand 180 degrees */
+    transform-origin: center;
+  }
+  
+  /* Hide the content of the cards for other players */
+  .card-back {
+    background-image: url("/Users/alexpeffer/Documents/School/CS4398/Project/Bluff-Card-Game/frontend/public/sprites/cards/Back2.png"); 
+    background-size: cover;
+    width: 100px;
+    height: 140px; /* Adjust based on your card dimensions */
+    display: block;
+  }

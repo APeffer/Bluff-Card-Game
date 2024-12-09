@@ -28,6 +28,9 @@ function Card({rank, suit}) {
     case "club":
         suit = 7;
         break;
+    case "?":
+        suit = 0;
+        break;
     default:
         throw new Error ("Suit is not a valid suitname, either invalid, pluralized, or capitalized. Please make sure suit name is singular and lowercase i.e. club, heart, diamond, spade.")
         break;
@@ -46,7 +49,7 @@ function Card({rank, suit}) {
     <div className={"card"} onClick={handleSelect}>
         { // card is upright? show card, else show cardback
           upright ? 
-          <img src={`/sprites/cards/${rank}.${suit}.png`} style={selected ? {border:'solid', borderColor:'#F4F'} : {border:'none', borderColor:'none'} } alt={`Card rank:${rank} suit:${suit}`}></img>
+          <img src={suit == 0 ? `/sprites/cards/Back2.png` : `/sprites/cards/${rank}.${suit}.png`}></img>
           : <img src={`/sprites/cards/Back2.png`} alt={`Card facedown`}></img>
         }
 
