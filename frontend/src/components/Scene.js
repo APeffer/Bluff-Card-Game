@@ -11,7 +11,8 @@ import WebSocketComponent from './websocket/WebSocketComponent.js'
 
 function Scene() {
   const [user, setUser] = useState(null)
-  const [currentScene, setCurrentScene] = useState(<MainMenu />)
+  const [currentScene, setCurrentScene] = useState('mainmenu')
+  const [lobbyCode, setLobbyCode] = useState("");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -24,11 +25,11 @@ function Scene() {
   const renderScene = () => {
     switch (currentScene) {
         case 'mainmenu':
-            return <MainMenu changeScene={setCurrentScene} user={user}/>;
+            return <MainMenu changeScene={setCurrentScene} user={user} changeLobbyCode={setLobbyCode}/>;
         case 'game':
             return <Gameboard />;
         case 'websockettest':
-            return <WebSocketComponent user={user} />; 
+            return <WebSocketComponent changeScene={setCurrentScene} user={user} givenCode={lobbyCode} />; 
         case 'signup':
             return <SignUp changeScene={setCurrentScene} />
         case 'login':
