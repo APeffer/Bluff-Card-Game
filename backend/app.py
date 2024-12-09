@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from bluff import BluffGame
+import pydealer
 
 app = Flask(__name__)
 game_instance = None
@@ -79,6 +80,40 @@ def game_state():
     }
 
     return jsonify(state)
+
+@app.route('/process-bluff', methods=['POST'])
+def process_bluff():
+    global game_instance
+    try:
+        data = request.json
+        bluff = data.get("bluff")
+        player_index = data.get("player_index")
+
+        if bluff is None or player_index is None:
+            return jsonify({"error": "Missing bluff or player index"}), 400
+        
+        last_played_cards = game_instance.last_played_cards
+        announced_rank = game_instance.announced_rank
+
+        was_bluffing = not all(card.value.strip().lower() == announced_rank.strip().lower() for card in last_played_cards)
+
+        if bluff:
+            if was_bluffing:
+                game_instance.players[player_index].add(game_instance.center_pile.cards)
+                game_instance.center_pile = pydealer.Stack()
+                return jsonify({"message": "Bluff called correctly", "was_bluffing": was_bluffing})
+            else:
+                challenger_index = (player_index + 1) % len(game_instance.players)
+                game_instance.players[challenger_index].add(game_instance.center_pile.cards)
+                game_instance.center_pile = pydealer.Stack()
+                return jsonify({"message": "Bluff not called correctly", "was_bluffing": was_bluffing})
+        else:
+            return jsonify({"message": "Bluff not called", "was_bluffing": was_bluffing})
+        
+    except Exception as e:
+        return jsonify({"error": "An error occurred while processing the bluff"}), 500
+
+
 
 @app.route('/check-winner', methods=['GET'])
 def check_winner():
