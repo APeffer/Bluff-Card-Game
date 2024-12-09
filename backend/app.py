@@ -1,9 +1,12 @@
 from collections import deque
 from flask import Flask, request, jsonify
-from bluff import BluffGame
+from backend.bluff import BluffGame
 import pydealer
+from flask_cors import CORS
+
 
 app = Flask(__name__)
+CORS(app)
 game_instance = None
 
 @app.route('/start-game', methods=['POST'])
@@ -57,7 +60,7 @@ def player_action():
 
         # update the center pile
         temp_stack = pydealer.Stack()
-        temp_stack.card = deque(selected_cards)
+        temp_stack.cards = deque(selected_cards)
         game_instance.center_pile.add(temp_stack)
 
         #update the game state
