@@ -122,10 +122,10 @@ def check_winner():
         return jsonify({"error": "Game not started"}), 400
     try:
         winner_index = game_instance.check_winner()
-        if winner_index != -1:
-            return jsonify({"winner": winner_index})
+        if winner_index is not None:
+            return jsonify({"winner": winner_index, "message": f"Player {winner_index + 1} won the game!"}),200
         else:
-            return jsonify({"winner": None, "message": "No winner yet"})
+            return jsonify({"winner": None, "message": "No winner yet"}),200
     except Exception as e:
         return jsonify({"error": "unable to determine the winner", "details": str(e)}), 500
 
