@@ -1,7 +1,9 @@
 {
   "dependencies": {
+    "@types/react-router-dom": "^5.3.3",
     "bootstrap": "^5.3.3",
     "firebase": "^11.0.1",
+    "framer-motion": "^11.13.3",
     "react-router-dom": "^7.0.2"
   }
 }

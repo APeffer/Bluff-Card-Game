@@ -1,25 +1,33 @@
 .card {
-    width: 100px; /* Adjust the width */
-    height: auto; /* Maintain aspect ratio */
-    margin: 5px; /* Add some spacing between cards */
-    display: inline-block; /* Make cards inline for better layout */
-    cursor: pointer; /* Show pointer cursor on hover */
-    border: 2px solid transparent; /* Add a transparent border for selection effect */
-    transition: transform 0.2s; /* Add hover effect */
+    width: 70px; 
+    height: auto; 
+    margin: 5px; 
+    display: inline-block; 
+    cursor: pointer; 
+    border: 2px solid transparent; 
+    transition: transform 0.2s; 
 }
 
 .card img {
-    width: 100%; /* Make image fill the card */
-    height: 100%; /* Ensure image respects card size */
-    object-fit: contain; /* Ensure the image is scaled without distortion */
+    width: 100%; 
+    height: 100%;
+    object-fit: contain; 
 }
 
 .card.selected {
-    border-color: #007bff; /* Highlight selected cards with a blue border */
-    transform: scale(1.1); /* Slightly enlarge the selected card */
+    border: #3d2222 3px solid; 
+    opacity: 0.8;
+    transform: scale(1.1);
 }
 .center-pile .card {
-    opacity: 0.8; /* Slightly faded appearance for center pile */
-    cursor: default; /* No pointer cursor for non-clickable cards */
+    opacity: 0.8;
+    cursor: default; 
 }
 
+.center-pile .card {
+    width: 60px; 
+    height: auto; 
+    opacity: 0.8;
+    cursor: default; 
+    margin: 2px; 
+}
