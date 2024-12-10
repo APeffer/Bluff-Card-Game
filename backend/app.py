@@ -1,6 +1,6 @@
 from collections import deque
 from flask import Flask, request, jsonify
-from backend.bluff import BluffGame
+from bluff import BluffGame
 import pydealer
 from flask_cors import CORS
 
@@ -36,59 +36,63 @@ def start_game():
 @app.route('/player-action', methods=['POST'])
 def player_action():
     global game_instance
-    
     try:
         data = request.json
         player_index = data['player_index']
         announced_rank = data['announced_rank']
         selected_cards = data['selected_cards']
 
-        # Validate input
-        if not isinstance(player_index, int) or not isinstance(announced_rank, str) or not isinstance(selected_cards, list):
-            return jsonify({"error": "Invalid input"}), 400
+        # Convert indices to card objects
+        player_hand = game_instance.players[player_index]
+        selected_cards = [player_hand.cards[i] for i in selected_cards]
 
-        # convert indices to card objects
-        try:
-            player_hand = game_instance.players[player_index]
-            selected_cards = [player_hand.cards[i] for i in selected_cards]     
-        except (IndexError, AttributeError):
-            return jsonify({"error": "Invalid card index"}), 400
-
-        #remove selected cards from player's hand
+        # Remove selected cards from player's hand
         for i in sorted(selected_cards, reverse=True):
             del player_hand.cards[i]
 
-        # update the center pile
+        # Update the center pile
         temp_stack = pydealer.Stack()
         temp_stack.cards = deque(selected_cards)
         game_instance.center_pile.add(temp_stack)
 
-        #update the game state
+        # Update game state
         game_instance.last_played_cards = selected_cards
         game_instance.announced_rank = announced_rank
 
         return jsonify({"message": "Player action successful"}),200
-    
     except Exception as e:
         return jsonify({"error": "An error occurred while processing the action"}), 500
 
 
-@app.route('/game_state', methods=['GET'])
+
+@app.route('/game-state', methods=['GET'])
 def game_state():
     global game_instance
     if game_instance is None:
         return jsonify({"error": "Game not started"}), 400
 
     state = {
-        "players":[
-        {
-            'index': i,
-            'num_cards': len(player.cards)
-        } for i, player in enumerate(game_instance.players)
+        "players": [
+            {
+                'index': i,
+                'num_cards': len(player.cards),
+                'cards': [
+                    {
+                        'rank': card.value,
+                        'suit': card.suit.lower()  # Ensure suit matches frontend naming
+                    }
+                    for card in player.cards
+                ]
+            } for i, player in enumerate(game_instance.players)
         ],
-        "center_pile":game_instance.get_card_names(game_instance.center_pile.cards),
+        "center_pile": [
+            {
+                'rank': card.value,
+                'suit': card.suit.lower()
+            }
+            for card in game_instance.center_pile.cards
+        ],
     }
-
     return jsonify(state)
 
 @app.route('/process-bluff', methods=['POST'])
@@ -96,16 +100,21 @@ def process_bluff():
     global game_instance
     try:
         data = request.json
+        print("Bluff data received:", data)  # Debugging
+
         bluff = data.get("bluff")
         player_index = data.get("player_index")
 
         if bluff is None or player_index is None:
             return jsonify({"error": "Missing bluff or player index"}), 400
-        
+
         last_played_cards = game_instance.last_played_cards
         announced_rank = game_instance.announced_rank
 
-        was_bluffing = not all(card.value.strip().lower() == announced_rank.strip().lower() for card in last_played_cards)
+        was_bluffing = not all(
+            card.value.strip().lower() == announced_rank.strip().lower()
+            for card in last_played_cards
+        )
 
         if bluff:
             if was_bluffing:
@@ -119,8 +128,8 @@ def process_bluff():
                 return jsonify({"message": "Bluff not called correctly", "was_bluffing": was_bluffing})
         else:
             return jsonify({"message": "Bluff not called", "was_bluffing": was_bluffing})
-        
     except Exception as e:
+        print("Error in /process-bluff:", e)  # Log exception
         return jsonify({"error": "An error occurred while processing the bluff"}), 500
 
 
