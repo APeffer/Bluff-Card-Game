@@ -11,7 +11,7 @@ const WebSocketComponent = ({changeScene, user, givenCode }) => {
   const [cardsToPlay, setCardsToPlay] = useState([]);
   const username = user.email.split("@")[0];
   const [hand, setHand] = useState([{suit: "heart", rank: "K"}, {suit: "diamond", rank: "8"}])
-  const [userInfo, setUserInfo] = useState({username: username, hand: hand})
+  const [userInfo, setUserInfo] = useState({player: {username: username, hand: hand}})
   const [roomCode, setRoomCode] = useState(givenCode);
 
   useEffect(() => {
@@ -22,7 +22,7 @@ const WebSocketComponent = ({changeScene, user, givenCode }) => {
     socketInstance.on("player_joined_room", (data) => {
       console.log(`Data to parse: ${JSON.stringify(data)}`); 
       //setPlayers(data.players);
-      setMessages((prev) => [...prev.slice(-5), `${data.username} joined the game!`]);
+      setMessages((prev) => [...prev.slice(-5), `${data.sid}: ${data.username} joined the game!`]);
     });
 
     socketInstance.on("player_move", (data) => {
@@ -53,18 +53,31 @@ const WebSocketComponent = ({changeScene, user, givenCode }) => {
     })
 
     socketInstance.on("update_hand", (data) => {
-      console.log(`Setting user's hand to: ${data.updated_hand}`);
-      setHand(data.updated_hand)
-      setUserInfo({username: username, hand: data.updated_hand})
-      console.log(`Setting user's hand to: ${data.updated_hand}`);
+      console.log(`TRYING TO UPDATE HAND`);
+      if (userInfo.player.username == data.username){
+        setUserInfo({player: data})
+        setHand(data.hand)
+        console.log(`Setting user's hand to: ${data.updated_hand}`);
+        //socketInstance.emit("updatePlayerOnServer", {user: userInfo, room: roomCode})
+      }
+      else{
+        console.log("Not updating your hand");
+      }
+      
+      
     })
 
     socketInstance.on("player_list_updated", (data) => {
-      console.log("PLAYER_LIST_UPDATED RECIEVED");
       console.log("Updated players:", data.players);
-      setPlayers(data.players || []); // Update players
-      console.log("PLAYER_LIST_UPDATED FINISHED");
+      setPlayers(data.players || {}); // Update players
     });
+
+
+    socketInstance.on("player_individual_updated", (data) => {
+      console.log("PLAYER INDIVIDUAL UPDATE RECIEVED");
+      console.log(`Data to parse: ${JSON.stringify(data)}`); 
+      setUserInfo(data);
+    })
 
     return () => {
       socketInstance.disconnect();
@@ -86,9 +99,9 @@ const WebSocketComponent = ({changeScene, user, givenCode }) => {
   }, [socket, roomCode]); // This effect runs after `socket` is initialized
 
   useEffect(() => {
-
+    console.log(`Individual player Updated: ${JSON.stringify(userInfo)}`);
     console.log("Players updated:", JSON.stringify(players));
-  }, [players]);
+  }, [userInfo]);
 
   const handleJoinRoom = () => {
     if (!username) {
@@ -111,43 +124,30 @@ const WebSocketComponent = ({changeScene, user, givenCode }) => {
     handleJoinRoom(); // Use the same logic for joining the new room
   };
 
-
-  // const handleMove = (cards) => {
-  //   if (socket) {
-  //     let fakecards = ["2h", "ks", "ac", "7d"]
-  //     let fakecall = "6s"
-  //     let fakebluff = true
-  //     console.log(`Trying to handleMove. Cards: ${fakecards}, claim: ${fakecards.length} ${fakecall}, bluff: ${fakebluff} `);
-  //     socket.emit("move", { username: username, move: {cards: fakecards , claim: `${fakecards.length} ${fakecall}`, bluff: fakebluff} /*cards.toString()*/ });
-  //     console.log(`Move submitted`);
-  //   }
-  // };
-
-  // const handleCallBluff = () => {
-  //   if (socket) {
-  //     console.log(`Trying to call bluff`);
-  //     socket.emit("callBluff", {username: username})
-  //   }
-  // }
-
   return (
     <>
-      {/* 
-        <div className="hands">
-          {players.map((player, index) => (
-            <Hand key={index} player={player} roomCode={roomCode} />
-          ))}
-        </div> 
-      */}
-      <Hand player={userInfo} roomCode={roomCode} />
+      {players.map((playerObj, index) => {
+        const playerEntry = Object.entries(playerObj)[0]; // Get the first entry
+        if (!playerEntry) return null; // Skip if invalid
+
+        const [playerId, playerData] = playerEntry;
+
+        // Only render if this player is not the current user
+        return playerData.username !== userInfo.player.username ? (
+          <Hand key={playerId} player={playerData} roomCode={roomCode} />
+        ) : null;
+      })}
+      <Hand player={userInfo.player} roomCode={roomCode} />
       <div className="gameMessages" style={{ position: "fixed", top: "90px", left: "10px", color: "white" }}>
         <h2>Players in the Game</h2>
         <ul>
-          {(players || []).map((username, index) => (
-            <li key={index}>
-              {username} {/* Accessing the username property of the player object */}
-            </li>
-          ))}
+          {(players || []).map((playerObj, index) => {
+            const [playerId, playerData] = Object.entries(playerObj)[0];
+            return(
+              <li key={playerId}>
+                {playerData.username}
+              </li>
+            )})}
         </ul>
         <h2>Game Messages</h2>
         <ul>

@@ -41,12 +41,8 @@ function Card({rank, suit}) {
     setUpright(!upright);
   };
 
-  const handleSelect = () => {
-    selected ? setSelected(false) : setSelected(true);
-  }
-
   return (
-    <div className={"card"} onClick={handleSelect}>
+    <div className={"card"}>
         { // card is upright? show card, else show cardback
           upright ? 
           <img src={suit == 0 ? `/sprites/cards/Back2.png` : `/sprites/cards/${rank}.${suit}.png`}></img>
