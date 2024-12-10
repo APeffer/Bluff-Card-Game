@@ -1,4 +1,33 @@
 .card {
-    margin: 0;
-    transition: transform 0.3s ease-in-out;
+    width: 70px; 
+    height: auto; 
+    margin: 5px; 
+    display: inline-block; 
+    cursor: pointer; 
+    border: 2px solid transparent; 
+    transition: transform 0.2s; 
+}
+
+.card img {
+    width: 100%; 
+    height: 100%;
+    object-fit: contain; 
+}
+
+.card.selected {
+    border: #3d2222 3px solid; 
+    opacity: 0.8;
+    transform: scale(1.1);
+}
+.center-pile .card {
+    opacity: 0.8;
+    cursor: default; 
+}
+
+.center-pile .card {
+    width: 60px; 
+    height: auto; 
+    opacity: 0.8;
+    cursor: default; 
+    margin: 2px; 
 }
