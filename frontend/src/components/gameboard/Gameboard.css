@@ -1,5 +1,95 @@
 .gameboard {
-    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    height: 90vh;
+    width: 80%;
+    margin: 0 auto;
+    transition: opacity 0.5s ease-in-out; 
+}
+
+.gameboard.modal-active {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.gameboard-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100vw;
-    background-color: rgb(13, 76, 13);
+    height: 100vh;
+    background: url('../img/back.jpg') no-repeat center center fixed;
+    background-size: cover;
+    z-index: 1049; 
+}
+
+.players-left {
+    position: absolute;
+    width: 200px;
+    padding: 1rem;
+    border: 5px solid black;
+    border-radius: 15px;
+    background-color: rgba(46, 139, 87, 0.5);
+    left: 10px;
+    top: 50px;
+}
+
+.center-pile {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.player-hand {
+    position: absolute;
+    bottom: 4vh;
+    width: 100%;
+    text-align: center;
+    padding: 1rem;
+}
+
+.hand {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2px;
+    margin-top: 10px;
+    max-width: 100%;
+}
+
+.winner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100%;
+}
+
+.winner-text {
+    font-size: 5rem;
+    text-align: center;
+    color: #fff;
+    font-weight: 500;
+}
+
+.modal.fade.show {
+    z-index: 1050;
+}
+
+.btn-move{
+    margin-top: 2rem;
+    padding-left: 3rem;
+    padding-right: 3rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+.current-player-text{
+    font-size: 2rem;
+    font-weight: 500;
+    color: #fff;
 }

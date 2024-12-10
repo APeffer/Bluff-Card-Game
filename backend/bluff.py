@@ -24,6 +24,7 @@ class BluffGame:
         cards_per_player = 52 // num_players
         self.players = [self.deck.deal(cards_per_player) for _ in range(num_players)]
         self.center_pile = pydealer.Stack()
+        self.annouced_rank = None
 
     def get_card_names(self, cards: List[Card]) -> str:
         """
@@ -142,12 +143,12 @@ class BluffGame:
             None
         
         Returns:
-            int: Index of the winning player, -1 if no winner
+            int: Index of the winning player, or None if no winner
         """
         for i, player in enumerate(self.players):
             if len(player) == 0:
                 return i
-        return -1
+        return None
 
     def play_game(self) -> None:
         """

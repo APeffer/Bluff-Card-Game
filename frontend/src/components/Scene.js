@@ -10,7 +10,7 @@ import Login from './login/Login'
 
 function Scene() {
   const [user, setUser] = useState(null)
-  const [currentScene, setCurrentScene] = useState(<MainMenu />)
+  const [currentScene, setCurrentScene] = useState('mainmenu')
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
