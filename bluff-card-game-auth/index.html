@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bluff Card Game Auth</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.5.0/dist/semantic.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <section  id="main-view">
+
+         <!--LOGIN FROM -->
+         <div class="ui segment grey" id="login-form">
+            <form class="ui form big">
+                <div class="ui stacked segment">
+                
+
+                    <div class="ui error message big" id="login-error-message"></div>
+                    <div class="field">
+                        <div class="ui left icon input big">
+                            <i class="mail icon"></i>
+                            <input type="email" placeholder="Email" id="login-email" />
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <div class="ui left icon input big">
+                            <i class="lock icon"></i>
+                            <input type="password" placeholder="Password" id="login-password" />
+                        </div>
+                    </div>
+                    <button class="ui button blue fluid big" id="login-btn">LOG IN</button>
+
+                    <br />
+                    <a id="forgot-password-btn">Forgot Password</a>
+
+                </div>
+            </form>
+            <div class="ui message big">Need an account? <a id="need-an-account-btn">Sign up</a></div>
+        </div>
+
+        </div>
+
+        <!--SIGN UP FROM -->
+        <div class="ui segment grey signup-form" id="signup-form">
+
+            <form class="ui form ">
+                <div class="ui stacked segment">
+
+                    <div class="ui error message big" id="error-message">
+                    </div>
+
+                    <div class="field">
+                        <div class="ui left icon input big">
+                            <i class="image icon"></i>
+                            <input type="file" id="image-file-input" />
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <div class="ui left icon input big">
+                            <i class="user icon"></i>
+                            <input type="text" placeholder="Name" id="name" />
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <div class="ui left icon input big">
+                            <i class="phone icon"></i>
+                            <input type="number" placeholder="Phone" id="phone" />
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <div class="ui left icon input big">
+                            <i class="mail icon"></i>
+                            <input type="email" placeholder="Email" id="email" />
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="ui left icon input big">
+                            <i class="lock icon"></i>
+                            <input type="password" placeholder="Password" id="password" />
+                        </div>
+                    </div>
+                    <button class="ui button green fluid big" id="signup-btn">CREATE ACCOUT</button>
+                </div>
+            </form>
+
+            <div class="ui message big">Already have an account? </div> <a id="have-an-account-btn">Log In</a>
+        </div>
+
+        <!--RESET PASSWORD -->
+        <div class="ui segment big" id="reset-password-form">
+            <h1>Reset Your Password </h1>
+            <p>Enter your email address to reset your password.</p>
+            <div class="ui message hidden" id="rp-message"></div>
+            <form class="ui form big">
+                <div class="field">
+                    <div class="ui left icon input">
+                        <i class="mail icon"></i>
+                        <input type="email" placeholder="Email" id="reset-password-email" />
+                    </div>
+                </div>
+                <button class="ui button red big" id="reset-password-btn">Reset Password</button>
+            </form>
+        </div>
+
+        <!--EMAIL VERIFICATION -->
+        <div class="ui segment big" id="email-verification">
+            <div class="ui card fluid">
+                <div class="content">
+                    <div class="header">Verification Email Sent! <i class="icon check green"></i></div>
+                    <div class="meta">We've sent an email for verification. Please click the link in the email and
+                        confirm.</div>
+                </div>
+                <div class="extra content">
+                    <button class="ui button red big" id="resend-email-btn">Resend</button>
+                </div>
+            </div>
+        </div>
+
+        <!--USER PROFILE -->
+        <div class="ui segment big" id="user-profile">
+
+            <div class="ui card fluid">
+                <div class="content">
+                    <div class="header">User Profile</div>
+                    <div class="meta" id="user-email">
+                        someemail@gmail.com
+                    </div>
+                </div>
+
+                <form class="ui form big">
+                    <div class="ui stacked segment">
+                       
+                        <input type="file" id="update-image-file-input" style="display:none" />
+
+                        <div class="field">
+                            <div class="ui left icon input big">
+                                <i class="user icon"></i>
+                                <input type="text" placeholder="Name" id="update-name" />
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <div class="ui left icon input big">
+                                <i class="phone icon"></i>
+                                <input type="number" placeholder="Phone" id="update-phone" />
+                            </div>
+                        </div>
+
+
+                        <div class="field">
+                            <div class="ui left icon input big">
+                                <i class="mail icon"></i>
+                                <input type="email" placeholder="Email" id="update-email" />
+                            </div>
+                        </div>
+
+                        <button class="ui button blue fluid big" id="update-btn">UPDATE </button>
+
+                    </div>
+                </form>
+
+                <div class="extra content">
+                    <button class="ui button red big" id="logout-btn">Log out</button>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+
+    <script src="firebase.js" type="module"></script>
+    <script src="app.js" type="module"></script>
+</body>
+</html>
