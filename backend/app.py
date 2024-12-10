@@ -10,7 +10,20 @@ CORS(app)
 game_instance = None
 
 @app.route('/start-game', methods=['POST'])
-def start_game():
+def start_game() -> any:
+    '''
+    Start a new game with the specified number of players
+
+    Request body:
+        num_players: int - Number of players in the game
+
+    Returns:
+        JSON object containing:
+            Initial state of the game, including the number of players and their cards (http status 200)
+            Error message if the number of players is invalid (http status 400)
+
+    '''
+
     global game_instance
     num_players = request.json['num_players']
 
@@ -34,7 +47,21 @@ def start_game():
     return jsonify(initial_state)
 
 @app.route('/player-action', methods=['POST'])
+
 def player_action():
+    '''
+    Processes a players turn, allowing them to play selected cards and announce a rank.
+
+    Request body:
+        player_index: int - Index of the player making the move
+        announced_rank: str - Rank announced by the player
+        selected_indices: list - Indices of the selected cards in the player's hand
+
+    Returns:
+        JSON response:
+            Success message if the player action was processed successfully (http status 200)
+            Error message if the player action could not be processed (http status 500)
+    '''
     global game_instance
     try:
         data = request.json
@@ -70,6 +97,13 @@ def player_action():
 
 @app.route('/game-state', methods=['GET'])
 def game_state():
+    '''
+    Retrieve the current state of the game, including the players' cards and the center pile.
+
+    Returns:
+        JSON object containing the current state of the game (http status 200)
+        Error message if the game has not been started (http status 400)
+    '''
     global game_instance
     if game_instance is None:
         return jsonify({"error": "Game not started"}), 400
@@ -107,6 +141,16 @@ def game_state():
 
 @app.route('/process-bluff', methods=['POST'])
 def process_bluff():
+    '''
+    Process a player's bluff call and distribute cards accordingly.
+
+    Request body:
+        bluff: bool - Whether the player is calling a bluff
+        player_index: int - Index of the player making the bluff call
+    
+    Returns:
+        JSON response indicating the result of the bluff call (HTTP 200).
+    '''
     global game_instance
     try:
         data = request.json
@@ -146,6 +190,12 @@ def process_bluff():
 
 @app.route('/check-winner', methods=['GET'])
 def check_winner():
+    '''
+    Check if there is a winner in the game.
+
+    Returns:
+        JSON response indicating the winner of the game, if any (HTTP 200).
+    '''
     global game_instance
     if game_instance is None:
         return jsonify({"error": "Game not started"}), 400
@@ -159,4 +209,7 @@ def check_winner():
         return jsonify({"error": "unable to determine the winner", "details": str(e)}), 500
 
 if __name__ == '__main__':
+    '''
+    Run the Flask app
+    '''
     app.run(debug=True)
