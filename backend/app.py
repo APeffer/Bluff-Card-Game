@@ -38,16 +38,18 @@ def player_action():
     global game_instance
     try:
         data = request.json
+        print("Player action data received:", data)  # Debugging
+
         player_index = data['player_index']
         announced_rank = data['announced_rank']
-        selected_cards = data['selected_cards']
+        selected_indices = data['selected_indices']
 
         # Convert indices to card objects
         player_hand = game_instance.players[player_index]
-        selected_cards = [player_hand.cards[i] for i in selected_cards]
+        selected_cards = [player_hand.cards[i] for i in selected_indices]
 
         # Remove selected cards from player's hand
-        for i in sorted(selected_cards, reverse=True):
+        for i in sorted(selected_indices, reverse=True):
             del player_hand.cards[i]
 
         # Update the center pile
@@ -59,8 +61,9 @@ def player_action():
         game_instance.last_played_cards = selected_cards
         game_instance.announced_rank = announced_rank
 
-        return jsonify({"message": "Player action successful"}),200
+        return jsonify({"message": "Player action successful"}), 200
     except Exception as e:
+        print("Error in /player-action:", e)  # Log exception
         return jsonify({"error": "An error occurred while processing the action"}), 500
 
 
@@ -71,29 +74,36 @@ def game_state():
     if game_instance is None:
         return jsonify({"error": "Game not started"}), 400
 
-    state = {
-        "players": [
-            {
-                'index': i,
-                'num_cards': len(player.cards),
-                'cards': [
-                    {
-                        'rank': card.value,
-                        'suit': card.suit.lower()  # Ensure suit matches frontend naming
-                    }
-                    for card in player.cards
-                ]
-            } for i, player in enumerate(game_instance.players)
-        ],
-        "center_pile": [
-            {
-                'rank': card.value,
-                'suit': card.suit.lower()
-            }
-            for card in game_instance.center_pile.cards
-        ],
-    }
-    return jsonify(state)
+    try:
+        state = {
+            "players": [
+                {
+                    'index': i,
+                    'num_cards': len(player.cards),
+                    'cards': [
+                        {
+                            'rank': card.value,
+                            'suit': card.suit.lower()  # Ensure suit matches frontend naming
+                        }
+                        for card in player.cards
+                    ]
+                } for i, player in enumerate(game_instance.players)
+            ],
+            # Always send center_pile as an array
+            "center_pile": [
+                {
+                    'rank': card.value,
+                    'suit': card.suit.lower()
+                }
+                for card in game_instance.center_pile.cards
+            ],
+        }
+        return jsonify(state)
+    except Exception as e:
+        print("Error in /game_state:", e)
+        return jsonify({"error": str(e)}), 500
+
+
 
 @app.route('/process-bluff', methods=['POST'])
 def process_bluff():
