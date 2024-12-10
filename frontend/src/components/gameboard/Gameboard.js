@@ -140,7 +140,7 @@ const GameBoard = () => {
         )}
     </div>
 
-    {awaitingBluff && <div className="modal-active-bg"></div>}
+    {awaitingBluff && <div className="modal-active-bg gameboard-modal"></div>}
 
     {awaitingBluff && (
         <div className="modal fade show d-block">

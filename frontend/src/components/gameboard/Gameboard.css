@@ -13,7 +13,7 @@
     pointer-events: none;
 }
 
-.modal-active-bg {
+.gameboard-modal {
     position: fixed;
     top: 0;
     left: 0;

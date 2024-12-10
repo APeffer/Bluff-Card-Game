@@ -35,6 +35,7 @@ const HomePage = () => {
         </div>
       </section>
       <Rules />
+      <small className="footer">&copy;2024 Developed by <a className="link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover" href='https://www.linkedin.com/in/muhammad-qassim/'>Muhammad Qassim</a> & <a className="link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover" href='http://apeffer.dev'>Alex Peffer</a></small>
     </div>
   );
 };
