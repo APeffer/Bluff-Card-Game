@@ -58,7 +58,7 @@ const NavBar = () => {
                   Profile
                 </Link>
               </li>
-              <div class="dropdown-divider"></div>
+              <div className="dropdown-divider"></div>
               <li>
                 <button className="dropdown-item" onClick={handleLogout}>
                   Logout

@@ -4,7 +4,7 @@ import Gameboard from "../gameboard/Gameboard";
 import Hand from "../hand/Hand";
 
 const WebSocketComponent = ({changeScene, user, givenCode }) => {
-  const [socket, setSocket] = useState(null);
+  const [socket, setSocket] = useState(io("http://localhost:8000"));
   const [players, setPlayers] = useState([]);
   const [messages, setMessages] = useState([]);
   const [currentTurn, setCurrentTurn] = useState(null);
@@ -15,24 +15,23 @@ const WebSocketComponent = ({changeScene, user, givenCode }) => {
   const [roomCode, setRoomCode] = useState(givenCode);
 
   useEffect(() => {
-    const socketInstance = io("http://localhost:8000");
-    setSocket(socketInstance);
+    //setSocket(io("http://localhost:8000"));
 
     // Handle incoming events
-    socketInstance.on("player_joined_room", (data) => {
+    socket.on("player_joined_room", (data) => {
       console.log(`Data to parse: ${JSON.stringify(data)}`); 
       //setPlayers(data.players);
-      setMessages((prev) => [...prev.slice(-5), `${data.sid}: ${data.username} joined the game!`]);
+      setMessages((prev) => [...prev.slice(-5), `${data.username} joined the game!`]);
     });
 
-    socketInstance.on("player_move", (data) => {
+    socket.on("player_move", (data) => {
       setMessages((prev) => [
         ...prev.slice(-5),
         `${data.username} move: ${JSON.stringify(data.move.claim_amount)} ${data.move.claim_value}s`,
       ]);
     }); 
 
-    socketInstance.on("player_left", (data) => {
+    socket.on("player_left", (data) => {
       setPlayers((prev) => prev.filter((p) => p.username !== data.username)); // Correct filtering
       setMessages((prev) => [
         ...prev.slice(-5), 
@@ -40,47 +39,44 @@ const WebSocketComponent = ({changeScene, user, givenCode }) => {
       ]);
     });
 
-    socketInstance.on("turn", (data) => {
+    socket.on("turn", (data) => {
       setCurrentTurn(data.username);
       console.log(`Turn changed to ${data.username}`);
     });
 
-    socketInstance.on("bluff_response", (data) => {
+    socket.on("bluff_response", (data) => {
       setMessages((prev) => [
         ...prev.slice(-5), 
         `${data.username} called the bluff ${data.callWas ? "correct" : "wrong"}`,
       ])
     })
 
-    socketInstance.on("update_hand", (data) => {
+    socket.on("update_hand", (data) => {
       console.log(`TRYING TO UPDATE HAND`);
       if (userInfo.player.username == data.username){
         setUserInfo({player: data})
         setHand(data.hand)
         console.log(`Setting user's hand to: ${data.updated_hand}`);
-        //socketInstance.emit("updatePlayerOnServer", {user: userInfo, room: roomCode})
+        //socket.emit("updatePlayerOnServer", {user: userInfo, room: roomCode})
       }
       else{
         console.log("Not updating your hand");
       }
-      
-      
     })
 
-    socketInstance.on("player_list_updated", (data) => {
+    socket.on("player_list_updated", (data) => {
       console.log("Updated players:", data.players);
       setPlayers(data.players || {}); // Update players
     });
 
-
-    socketInstance.on("player_individual_updated", (data) => {
+    socket.on("player_individual_updated", (data) => {
       console.log("PLAYER INDIVIDUAL UPDATE RECIEVED");
       console.log(`Data to parse: ${JSON.stringify(data)}`); 
       setUserInfo(data);
     })
 
     return () => {
-      socketInstance.disconnect();
+      socket.disconnect();
       console.error("disconnected");
     };
   }, []); // Effect will run once after component mounts
@@ -89,14 +85,14 @@ const WebSocketComponent = ({changeScene, user, givenCode }) => {
     if (socket) {
       console.log(`Room code: ${roomCode}`);
 
-      if (roomCode === "") {
+      if (roomCode == "") {
         console.log(`No Room Code String, creating room`);
         handleCreateRoom(socket);
       } else {
         handleJoinRoom(roomCode, socket);
       }
     }
-  }, [socket, roomCode]); // This effect runs after `socket` is initialized
+  }, [roomCode]); // This effect runs after `socket` is initialized
 
   useEffect(() => {
     console.log(`Individual player Updated: ${JSON.stringify(userInfo)}`);
@@ -112,7 +108,6 @@ const WebSocketComponent = ({changeScene, user, givenCode }) => {
     if (!roomCode) {
       return;
     }
-    console.log(`Joining room ${roomCode}`);
     socket.emit("joinRoom", { username: username, room: roomCode });
     console.log(`Joined room: ${roomCode} successfully`)
   };
@@ -125,7 +120,7 @@ const WebSocketComponent = ({changeScene, user, givenCode }) => {
   };
 
   return (
-    <>
+    <Gameboard roomCode={roomCode}>
       {players.map((playerObj, index) => {
         const playerEntry = Object.entries(playerObj)[0]; // Get the first entry
         if (!playerEntry) return null; // Skip if invalid
@@ -158,7 +153,7 @@ const WebSocketComponent = ({changeScene, user, givenCode }) => {
         {currentTurn && <h3>It's {currentTurn}'s turn!</h3>}
         
       </div>
-    </>
+    </Gameboard>
   );
 };
 

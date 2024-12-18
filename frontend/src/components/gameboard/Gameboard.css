@@ -3,3 +3,43 @@
     width: 100vw;
     background-color: rgb(13, 76, 13);
 }
+
+#NavRoomCode {
+    position: absolute;
+    bottom: 2em;
+    left:2em;
+}
+
+#NavRoomCode  p{
+    display: inline;
+    font-weight: bolder;
+    margin-right: 10px;
+    color: white;
+}
+
+#NavRoomCode  button{
+    display: inline;
+    color: black;
+    font-weight: bolder;
+}
+
+#copyPopup {
+    position: relative;
+    left: -58px;
+    bottom: 40px;
+    background-color: white;
+    font-size: small;
+    font-weight: bold;
+    padding: 0.5em;
+    border-radius: 0.2em;
+    animation: fadeOut 1s forwards;
+}
+
+@keyframes fadeOut {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }

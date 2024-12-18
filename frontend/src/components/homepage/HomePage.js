@@ -7,14 +7,14 @@ import Rules from "../rules/Rules";
 const HomePage = () => {
   return (
     <div className="page-wrapper">
-      <section class="block block--dark">
-        <div class="block__header container">
+      <section className="block block--dark">
+        <div className="block__header container">
           <header>
-            <h1 class="font-only-heading block__heading">
+            <h1 className="font-only-heading block__heading">
             Step Into the World of
             </h1>
-            <img src={logo} class="logo" alt=""></img>
-            <p class="hero__tagline">
+            <img src={logo} className="logo" alt=""></img>
+            <p className="hero__tagline">
             It’s Not What You Have, It’s What They Think You Have!
             </p>
             <div>
@@ -26,7 +26,7 @@ const HomePage = () => {
                 Rules
               </button>
               <Link to="/scene">
-                <button class="btn btn-success hero-learn-btn-2">
+                <button className="btn btn-success hero-learn-btn-2">
                   Play Now
                 </button>
               </Link>

@@ -1,0 +1,7 @@
+.card {
+    margin: 0;
+    transition: transform 0.3s ease-in-out;
+    background: none;
+    --bs-card-border-color: transparent; /* Make the border color transparent */
+    --bs-card-border-width: 0;          /* Set border width to 0 */
+}

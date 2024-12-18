@@ -56,7 +56,7 @@
   
   /* Hide the content of the cards for other players */
   .card-back {
-    background-image: url("C:\Users\AyyPeff\Documents\MyPrograms\Bluff Card Game\frontend\public\sprites\cards\Back2.png"); 
+    background-image: url("/Users/alexpeffer/Documents/School/CS4398/Project/Bluff-Card-Game/frontend/public/sprites/cards/Back2.png"); 
     background-size: cover;
     width: 100px;
     height: 140px; /* Adjust based on your card dimensions */

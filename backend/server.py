@@ -18,28 +18,21 @@ def joinRoom(sid, data):
     room_code = data.get("room")
     sio.enter_room(sid, room_code)
     print(f"{sid} ENTERED THE ROOM")
-
-
-
     # Create room if it doesn't exist
     if room_code not in rooms:
         rooms[room_code] = {"players": {}, "player_count": 0, "game_started": False, "claim_card": startingCard, "turn": 0, "pile": [], "last_move": {}}
-    
     if not username or not room_code:
         sio.emit("error", {"message": "Username and room code are required!"}, to=sid)
         return
-
     # Add player to room
     rooms[room_code]["players"][sid] = {"username": username, "hand": [
         {"suit": "heart", "rank": "K"},
         {"suit": "diamond", "rank": "8"}]}
     rooms[room_code]["player_count"] += 1
     print(f"{username} joined room {room_code}.")
-
     # Notify other players in the room
     sio.emit("player_joined_room", rooms[room_code]["players"].get(sid), room=room_code)
     print("EMITTED PLAYER_JOINED_ROOM")
-
     # Emit the usernames as an array
     players_in_room = [
         {sid: {"username": player_info["username"], "card_count": len(player_info["hand"])}}
@@ -47,15 +40,8 @@ def joinRoom(sid, data):
     ]
     sio.emit("player_list_updated", {"players": players_in_room}, room=room_code)
     print("EMITTED PLAYER_LIST_UPDATED TO ", room_code)
-
+    # Update individual player
     sio.emit("player_individual_updated", {"player": rooms[room_code]["players"][sid]}, to=sid)
-
-    # Debugging logs
-    print("TRIED TO SEND UPDATED PLAYER LIST")
-    print("Printing room[room_code] data: ", rooms[room_code])
-    print("DATA SENT: ", players_in_room)
-
-
     # Check if the room is ready to start the game
     if len(rooms[room_code]["players"]) in [2, 4]:
         print(f"Room {room_code} is ready. Starting the game!")
@@ -83,7 +69,6 @@ def joinRoom(sid, data):
         
 def connect(sid, environ):
     print(f"Client connected: {sid}")
-
 
 @sio.event
 def move(sid, data):

@@ -1,52 +1,29 @@
-import React from 'react';
+import React, { useState } from 'react';
 import "./Gameboard.css";
-import Hand from '../hand/Hand';
-import { auth } from "../../firebase.js";
 
-function Gameboard({ children }) {
-  
 
-  // sample player object
-  const player1 = {
-    name: "Alex",
-    hand: [
-      {suit: "heart", rank: "K"},
-      {suit: "club", rank: "6"},
-      {suit: "diamond", rank: "J"},
-      {suit: "spade", rank: "9"},
-      {suit: "heart", rank: "A"}
-    ]
+function Gameboard({ children, roomCode }) {
+  const [hidePopup, setHidePopup] = useState(true);
+
+  function handleCopyClick() {
+    navigator.clipboard.writeText(roomCode)
+    //const popup = document.getElementById("copyPopup")
+    if (setHidePopup){
+      setHidePopup(false)
+    }
+    setTimeout(()=> {
+      setHidePopup(true)
+    }, 1000)
   }
-
-  const player2 = {
-    name: "Yan",
-    hand: [
-      {suit: "heart", rank: "K"},
-      {suit: "club", rank: "6"},
-      {suit: "diamond", rank: "J"},
-      {suit: "spade", rank: "9"},
-      {suit: "heart", rank: "A"}
-    ]
-  }
-
-  const player3 = {
-    name: "Muhammad",
-    hand: [
-      {suit: "heart", rank: "K"},
-      {suit: "club", rank: "6"},
-      {suit: "diamond", rank: "J"},
-      {suit: "spade", rank: "9"},
-      {suit: "heart", rank: "A"}
-    ]
-  }
-
-
 
   return (
     <div className='gameboard'>
-        <Hand player={player1}/>
-        <Hand player={player2}/>
-        <Hand player={player3}/>
+        {children}
+        <div id='NavRoomCode'>
+          <p>Room Code: {roomCode ? roomCode : "No Room"}</p>
+          <button onClick={handleCopyClick}>Copy</button>
+          <span id='copyPopup' hidden={hidePopup}>Copied!</span>
+        </div>
     </div>
   )
 }
