@@ -35,6 +35,7 @@ function Hand({ player, roomCode }) {
     // Emit the selected cards to the server when the player submits their move
     if (player?.username && roomCode) {
       socket.emit('move', {
+        sid: player.sid,
         username: player.username, // player's username
         room: roomCode, // The room code
         selectedCards: selectedCards, // The selected cards
@@ -47,6 +48,7 @@ function Hand({ player, roomCode }) {
   const handleCallBluff = () => {
     if (player?.username && roomCode) {
       socket.emit('callBluff', {
+        sid: player.sid,
         username: player.username, // player's username
         room: roomCode, // The room code
       });

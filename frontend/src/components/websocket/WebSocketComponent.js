@@ -4,23 +4,25 @@ import Gameboard from "../gameboard/Gameboard";
 import Hand from "../hand/Hand";
 
 const WebSocketComponent = ({changeScene, user, givenCode }) => {
-  const [socket, setSocket] = useState(io("http://localhost:8000"));
-  const [players, setPlayers] = useState([]);
+  const [socket, setSocket] = useState(undefined);
+  const [sid, setSid] = useState("");
+  const [players, setPlayers] = useState({});
   const [messages, setMessages] = useState([]);
   const [currentTurn, setCurrentTurn] = useState(null);
   const [cardsToPlay, setCardsToPlay] = useState([]);
   const username = user.email.split("@")[0];
   const [hand, setHand] = useState([{suit: "heart", rank: "K"}, {suit: "diamond", rank: "8"}])
-  const [userInfo, setUserInfo] = useState({player: {username: username, hand: hand}})
+  const [userInfo, setUserInfo] = useState({player: {sid: sid, username: username, hand: hand}})
   const [roomCode, setRoomCode] = useState(givenCode);
 
   useEffect(() => {
-    //setSocket(io("http://localhost:8000"));
+    setSocket(io("http://localhost:8000"), {
+      query: {playerId: user.email}
+      
+    });
 
     // Handle incoming events
     socket.on("player_joined_room", (data) => {
-      console.log(`Data to parse: ${JSON.stringify(data)}`); 
-      //setPlayers(data.players);
       setMessages((prev) => [...prev.slice(-5), `${data.username} joined the game!`]);
     });
 
@@ -53,51 +55,61 @@ const WebSocketComponent = ({changeScene, user, givenCode }) => {
 
     socket.on("update_hand", (data) => {
       console.log(`TRYING TO UPDATE HAND`);
-      if (userInfo.player.username == data.username){
+      //if (userInfo.player.username === data.username){
         setUserInfo({player: data})
         setHand(data.hand)
         console.log(`Setting user's hand to: ${data.updated_hand}`);
         //socket.emit("updatePlayerOnServer", {user: userInfo, room: roomCode})
-      }
-      else{
+      //}
+      //else{
         console.log("Not updating your hand");
-      }
+      //}
     })
 
     socket.on("player_list_updated", (data) => {
-      console.log("Updated players:", data.players);
-      setPlayers(data.players || {}); // Update players
+      setPlayers(data || {}); // Update players object
     });
 
     socket.on("player_individual_updated", (data) => {
-      console.log("PLAYER INDIVIDUAL UPDATE RECIEVED");
-      console.log(`Data to parse: ${JSON.stringify(data)}`); 
       setUserInfo(data);
+    })
+
+    socket.on("error", (data) => {
+      console.log(JSON.stringify(data))
     })
 
     return () => {
       socket.disconnect();
       console.error("disconnected");
     };
-  }, []); // Effect will run once after component mounts
+  }, [socket]); // Effect will run once after component mounts
 
   useEffect(() => {
     if (socket) {
+      console.log(`Socket: ${socket}`)
       console.log(`Room code: ${roomCode}`);
 
-      if (roomCode == "") {
+      if (roomCode === "") {
         console.log(`No Room Code String, creating room`);
         handleCreateRoom(socket);
       } else {
         handleJoinRoom(roomCode, socket);
       }
     }
-  }, [roomCode]); // This effect runs after `socket` is initialized
+  }, [roomCode, socket]); // This effect runs after `socket` is initialized
 
   useEffect(() => {
-    console.log(`Individual player Updated: ${JSON.stringify(userInfo)}`);
-    console.log("Players updated:", JSON.stringify(players));
-  }, [userInfo]);
+    console.log(`Individual player Updated:\nusername: ${JSON.stringify(userInfo.player.username)}\nhand: ${JSON.stringify(userInfo.player.hand)}`);
+      
+    console.log("Player list updated:\n")
+    //Object.keys(players), JSON.stringify(Object.values(players)))
+    Object.keys(players).forEach(key => {
+      // Print the key and the JSON string of the value
+      console.log(`${key}: ${JSON.stringify(players[key])}`);
+    });
+    
+    checkPlayer1(players, username)
+  }, [players, userInfo]);
 
   const handleJoinRoom = () => {
     if (!username) {
@@ -113,37 +125,54 @@ const WebSocketComponent = ({changeScene, user, givenCode }) => {
   };
 
   const handleCreateRoom = () => {
-    const newRoomCode = Math.random().toString(36).substr(2, 5).toUpperCase();
+    const newRoomCode = Math.random().toString(36).substring(2, 7).toUpperCase();
     console.log(`Creating a room and setting code to: ${newRoomCode}`);
     setRoomCode(newRoomCode);
     handleJoinRoom(); // Use the same logic for joining the new room
   };
 
+  function checkPlayer1(p, u){
+    if (Object.keys(p).length !== 0){
+      const first_player_username = Object.values(p)[0].username
+      if (username === first_player_username){
+        return true
+      }
+    }
+    
+    return false
+  }
+
   return (
     <Gameboard roomCode={roomCode}>
-      {players.map((playerObj, index) => {
-        const playerEntry = Object.entries(playerObj)[0]; // Get the first entry
-        if (!playerEntry) return null; // Skip if invalid
+      <h3>MySid {sid}</h3>
+      
+      { /* MAP OTHER PLAYERS TO A HAND */
+        (Object.values(players) || []).map((playerObj, index) => {
 
-        const [playerId, playerData] = playerEntry;
-
-        // Only render if this player is not the current user
-        return playerData.username !== userInfo.player.username ? (
-          <Hand key={playerId} player={playerData} roomCode={roomCode} />
-        ) : null;
+        // Only render opposing players, not current user.
+        return (
+          playerObj.username !== userInfo.player.username ? 
+          <Hand key={index} player={playerObj} roomCode={roomCode} /> :
+          null
+        );
       })}
+
+      {/* ADD USER'S HAND */}
       <Hand player={userInfo.player} roomCode={roomCode} />
+
+      {/* PLAYER LIST */}
       <div className="gameMessages" style={{ position: "fixed", top: "90px", left: "10px", color: "white" }}>
         <h2>Players in the Game</h2>
         <ul>
-          {(players || []).map((playerObj, index) => {
-            const [playerId, playerData] = Object.entries(playerObj)[0];
+          {(Object.values(players) || []).map((playerObj, index) => {
             return(
-              <li key={playerId}>
-                {playerData.username}
+              <li key={index}>
+                {playerObj.username}
               </li>
             )})}
         </ul>
+
+        {/* GAME MESSAGE EVENTS */}
         <h2>Game Messages</h2>
         <ul>
           {messages.map((message, index) => (
@@ -153,6 +182,8 @@ const WebSocketComponent = ({changeScene, user, givenCode }) => {
         {currentTurn && <h3>It's {currentTurn}'s turn!</h3>}
         
       </div>
+      {checkPlayer1(players, username) && <button>START GAME</button>}
+
     </Gameboard>
   );
 };

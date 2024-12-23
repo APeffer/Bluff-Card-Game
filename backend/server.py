@@ -5,6 +5,8 @@ import eventlet
 sio = socketio.Server(cors_allowed_origins='*')  # Allow all origins for development
 app = socketio.WSGIApp(sio)
 
+playerConnections = {}
+
 # Store rooms
 rooms = {}
 startingCard = "A"
@@ -20,32 +22,41 @@ def joinRoom(sid, data):
     print(f"{sid} ENTERED THE ROOM")
     # Create room if it doesn't exist
     if room_code not in rooms:
-        rooms[room_code] = {"players": {}, "player_count": 0, "game_started": False, "claim_card": startingCard, "turn": 0, "pile": [], "last_move": {}}
+        rooms[room_code] = {"players": {}, "player_count": 0, "can_start": False, "game_started": False, "claim_card": startingCard, "turn": 0, "pile": [], "last_move": {}}
     if not username or not room_code:
         sio.emit("error", {"message": "Username and room code are required!"}, to=sid)
         return
-    # Add player to room
-    rooms[room_code]["players"][sid] = {"username": username, "hand": [
-        {"suit": "heart", "rank": "K"},
-        {"suit": "diamond", "rank": "8"}]}
-    rooms[room_code]["player_count"] += 1
-    print(f"{username} joined room {room_code}.")
-    # Notify other players in the room
-    sio.emit("player_joined_room", rooms[room_code]["players"].get(sid), room=room_code)
-    print("EMITTED PLAYER_JOINED_ROOM")
-    # Emit the usernames as an array
-    players_in_room = [
-        {sid: {"username": player_info["username"], "card_count": len(player_info["hand"])}}
-        for sid, player_info in rooms[room_code]["players"].items()
-    ]
-    sio.emit("player_list_updated", {"players": players_in_room}, room=room_code)
-    print("EMITTED PLAYER_LIST_UPDATED TO ", room_code)
-    # Update individual player
-    sio.emit("player_individual_updated", {"player": rooms[room_code]["players"][sid]}, to=sid)
-    # Check if the room is ready to start the game
-    if len(rooms[room_code]["players"]) in [2, 4]:
-        print(f"Room {room_code} is ready. Starting the game!")
-        sio.emit("game_start", {"room": room_code}, room=room_code)
+    # Allow join only if room isn't full
+    if rooms[room_code]["player_count"] <= 4:
+        # Add player to room only if game hasn't started
+        #if not rooms[room_code]["game_started"]:
+            rooms[room_code]["players"][sid] = {"username": username, "hand": [
+                {"suit": "heart", "rank": "2"},
+                {"suit": "diamond", "rank": "4"}]}
+            rooms[room_code]["player_count"] += 1
+            print(f"{username} joined room {room_code}.")
+            # Notify other players in the room
+            sio.emit("player_joined_room", rooms[room_code]["players"].get(sid), room=room_code)
+            print("EMITTED PLAYER_JOINED_ROOM")
+            # Emit the usernames as an array
+            players_in_room = {
+                sid: {"username": player_info["username"], "card_count": len(player_info["hand"])}
+                for sid, player_info in rooms[room_code]["players"].items()
+            }
+            sio.emit("player_list_updated", players_in_room, room=room_code)
+            print("EMITTED PLAYER_LIST_UPDATED TO", room_code)
+            # Update individual player
+            sio.emit("player_individual_updated", {"player": rooms[room_code]["players"][sid]}, to=sid)
+            # Check if the room is ready to start the game
+            if len(rooms[room_code]["players"]) in [2, 4]:
+                print(f"Room {room_code} is ready. Starting the game!")
+                sio.emit("game_can_start", {"canStart": True}, room=room_code)
+            else:
+                sio.emit("game_can_start", {"canStart": False}, room=room_code)
+        #else:
+            sio.emit("error", {"message": "Error joining game, game has already started."})
+    else:
+        sio.emit("error", {"message", "Error joining game, room is full."})
 
 # @sio.event
 # def updatePlayerOnServer(sid, data):
@@ -66,9 +77,11 @@ def joinRoom(sid, data):
 
 # @sio.event
         
-        
+@sio.event   
 def connect(sid, environ):
-    print(f"Client connected: {sid}")
+    queryString = environ.get('QUERY_STRING')
+    playerConnections["player_id"] = sid
+    print(f"\n\n\n\n\n\nPlayer {queryString.playerId} connected with sid {sid}\n\n\n\n\n\n from port {queryString.port}")
 
 @sio.event
 def move(sid, data):
@@ -95,7 +108,7 @@ def move(sid, data):
 
     rooms[room_id]["last_move"] = {"sid": userSid, "username": username, "bluff": bluff}
     rooms[room_id]["pile"].extend(selectedCards)
-    rooms[room_id]["turn"] = (rooms[room_id]["turn"] + 1) % len(rooms[room_id]["players"])
+    rooms[room_id]["turn"] = (rooms[room_id]["turn"] + 1) % rooms[room_id]["player_count"]
     nextCard = cardOrder[(cardOrder.index(claimCard) + 1) % 12]
     print(f"INDEX: {nextCard}")
     rooms[room_id]["claim_card"] = nextCard

@@ -4,23 +4,33 @@
     background-color: rgb(13, 76, 13);
 }
 
-#NavRoomCode {
+#RoomCodeContainer {
     position: absolute;
     bottom: 2em;
     left:2em;
 }
 
-#NavRoomCode  p{
+#RoomCodeContainer  p{
     display: inline;
     font-weight: bolder;
     margin-right: 10px;
     color: white;
 }
 
-#NavRoomCode  button{
+#RoomCodeContainer  button{
     display: inline;
     color: black;
     font-weight: bolder;
+    width: 80px;
+    margin: 0px 4px;
+}
+
+#roomCode {
+    margin-left: 0.5em;
+}
+
+#roomCode.blur {
+    filter: blur(8px);
 }
 
 #copyPopup {
