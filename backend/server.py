@@ -77,11 +77,9 @@ def joinRoom(sid, data):
 
 # @sio.event
         
-@sio.event   
-def connect(sid, environ):
-    queryString = environ.get('QUERY_STRING')
-    playerConnections["player_id"] = sid
-    print(f"\n\n\n\n\n\nPlayer {queryString.playerId} connected with sid {sid}\n\n\n\n\n\n from port {queryString.port}")
+@sio.event
+def connect(sid, environ, auth):
+    print('connect ', sid)
 
 @sio.event
 def move(sid, data):

@@ -1,88 +1,100 @@
 import React, { useEffect, useState } from "react";
 import { io } from "socket.io-client";
+import { socket } from "../../socket"
 import Gameboard from "../gameboard/Gameboard";
 import Hand from "../hand/Hand";
 
 const WebSocketComponent = ({changeScene, user, givenCode }) => {
-  const [socket, setSocket] = useState(undefined);
-  const [sid, setSid] = useState("");
-  const [players, setPlayers] = useState({});
-  const [messages, setMessages] = useState([]);
-  const [currentTurn, setCurrentTurn] = useState(null);
-  const [cardsToPlay, setCardsToPlay] = useState([]);
-  const username = user.email.split("@")[0];
-  const [hand, setHand] = useState([{suit: "heart", rank: "K"}, {suit: "diamond", rank: "8"}])
-  const [userInfo, setUserInfo] = useState({player: {sid: sid, username: username, hand: hand}})
-  const [roomCode, setRoomCode] = useState(givenCode);
+const [sid, setSid] = useState("");
+//const [sock, setSock] = useState(undefined);
+const [players, setPlayers] = useState({});
+const [messages, setMessages] = useState([]);
+const [currentTurn, setCurrentTurn] = useState(null);
+const [cardsToPlay, setCardsToPlay] = useState([]);
+const username = user.email.split("@")[0];
+const [hand, setHand] = useState([{suit: "heart", rank: "K"}, {suit: "diamond", rank: "8"}])
+const [userInfo, setUserInfo] = useState({player: {sid: sid, username: username, hand: hand}})
+const [roomCode, setRoomCode] = useState(givenCode);
+
+
 
   useEffect(() => {
-    setSocket(io("http://localhost:8000"), {
-      query: {playerId: user.email}
+    //const socket = io("http://localhost:8000", {
+      //query: {"playerId": user.email}
+    //})
+    
+
+    socket.connect()
+
+    //setSock(socket)
+
+    //if (socket) {
       
-    });
+      // Handle incoming events
+      socket.on("player_joined_room", (data) => {
+        setMessages((prev) => [...prev.slice(-5), `${data.username} joined the game!`]);
+      });
 
-    // Handle incoming events
-    socket.on("player_joined_room", (data) => {
-      setMessages((prev) => [...prev.slice(-5), `${data.username} joined the game!`]);
-    });
+      socket.on("player_move", (data) => {
+        setMessages((prev) => [
+          ...prev.slice(-5),
+          `${data.username} move: ${JSON.stringify(data.move.claim_amount)} ${data.move.claim_value}s`,
+        ]);
+      }); 
 
-    socket.on("player_move", (data) => {
-      setMessages((prev) => [
-        ...prev.slice(-5),
-        `${data.username} move: ${JSON.stringify(data.move.claim_amount)} ${data.move.claim_value}s`,
-      ]);
-    }); 
+      socket.on("player_left", (data) => {
+        setPlayers((prev) => prev.filter((p) => p.username !== data.username)); // Correct filtering
+        setMessages((prev) => [
+          ...prev.slice(-5), 
+          `${data.username} left the game.`,
+        ]);
+      });
 
-    socket.on("player_left", (data) => {
-      setPlayers((prev) => prev.filter((p) => p.username !== data.username)); // Correct filtering
-      setMessages((prev) => [
-        ...prev.slice(-5), 
-        `${data.username} left the game.`,
-      ]);
-    });
+      socket.on("turn", (data) => {
+        setCurrentTurn(data.username);
+        console.log(`Turn changed to ${data.username}`);
+      });
 
-    socket.on("turn", (data) => {
-      setCurrentTurn(data.username);
-      console.log(`Turn changed to ${data.username}`);
-    });
+      socket.on("bluff_response", (data) => {
+        setMessages((prev) => [
+          ...prev.slice(-5), 
+          `${data.username} called the bluff ${data.callWas ? "correct" : "wrong"}`,
+        ])
+      })
 
-    socket.on("bluff_response", (data) => {
-      setMessages((prev) => [
-        ...prev.slice(-5), 
-        `${data.username} called the bluff ${data.callWas ? "correct" : "wrong"}`,
-      ])
-    })
+      socket.on("update_hand", (data) => {
+        console.log(`TRYING TO UPDATE HAND`);
+        //if (userInfo.player.username === data.username){
+          setUserInfo({player: data})
+          setHand(data.hand)
+          console.log(`Setting user's hand to: ${data.updated_hand}`);
+          //socket.emit("updatePlayerOnServer", {user: userInfo, room: roomCode})
+        //}
+        //else{
+          console.log("Not updating your hand");
+        //}
+      })
 
-    socket.on("update_hand", (data) => {
-      console.log(`TRYING TO UPDATE HAND`);
-      //if (userInfo.player.username === data.username){
-        setUserInfo({player: data})
-        setHand(data.hand)
-        console.log(`Setting user's hand to: ${data.updated_hand}`);
-        //socket.emit("updatePlayerOnServer", {user: userInfo, room: roomCode})
-      //}
-      //else{
-        console.log("Not updating your hand");
-      //}
-    })
+      socket.on("player_list_updated", (data) => {
+        setPlayers(data || {}); // Update players object
+      });
 
-    socket.on("player_list_updated", (data) => {
-      setPlayers(data || {}); // Update players object
-    });
+      socket.on("player_individual_updated", (data) => {
+        setUserInfo(data);
+      })
 
-    socket.on("player_individual_updated", (data) => {
-      setUserInfo(data);
-    })
-
-    socket.on("error", (data) => {
-      console.log(JSON.stringify(data))
-    })
+      socket.on("error", (data) => {
+        console.log(JSON.stringify(data))
+      })
+    //}
 
     return () => {
-      socket.disconnect();
+      if (socket) {
+        socket.disconnect();
+      }
       console.error("disconnected");
     };
-  }, [socket]); // Effect will run once after component mounts
+  }, []); // Effect will run once after component mounts
 
   useEffect(() => {
     if (socket) {
